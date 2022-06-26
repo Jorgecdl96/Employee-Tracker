@@ -1,6 +1,7 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const cTable = require('console.table');
+const Query = require('mysql2/typings/mysql/lib/protocol/sequences/Query');
 
 const departmentTable = 'SELECT * FROM department';
 
@@ -156,7 +157,7 @@ const init = () => {
 inquirer.prompt([{
     type: 'list',
     message: 'What would you like to do?',
-    choices: ['view all departments', 'view all roles', 'view all employees', 'add a department', 'add a role', 'add an employee', 'update an employee role'],
+    choices: ['view all departments', 'view all roles', 'view all employees', 'add a department', 'add a role', 'add an employee', 'update an employee role', 'Quit'],
     name: 'options'
 }]).then((answers) => {
     let {options} = answers;
