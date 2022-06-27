@@ -2,6 +2,7 @@ const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const cTable = require('console.table');
 const { exit } = require('process');
+const { readSync } = require('fs');
 
 const db = mysql.createConnection(
     {
@@ -107,15 +108,16 @@ class PrintAndPrompt {
     promptQuestions(){
         inquirer.prompt(this.addingNewInfo)
         .then((answers) => {
-            const {addDepartment, addRole} = answers;
+            const {addDepartment, addRole, firstName} = answers;
 
             if(addDepartment){
                 newDepartment(answers);
             }else if(addRole){
                 newRole(answers);
-            }
-            else{
+            }else if(firstName){
                 newEmployee(answers);
+            }else{
+                updateEmployee(answers);
             }
 
         })
@@ -303,21 +305,45 @@ const newEmployee = (answers) => {
     }
 }
 
-const updateEmployee = () => {
-    updateEmployeeQuestions = [
-        {
-            type: 'input',
-            message: 'Which employee\'s role do you want to update?',
-            name: 'employee',
+const updateEmployee = (answers) => {
 
-        },
-        {
-            type: 'input',
-            message: 'Which role do you want to assign the selected employee?',
-            name: 'newRole',
+    if (!answers) {
+        
+        db.query(`SELECT id, CONCAT(first_name, ' ', last_name) AS Employees FROM employee`, (err, result, fields) => {
 
-        }
-    ]
+            const choicesEmpArr = result.map((data) => data.Employees);
+
+            db.query('SELECT * FROM role', (err, result, fields) => {
+
+                const choicesNewRoleArr = result.map((data) => data.title);
+
+                updateEmployeeQuestions = [
+                    {
+                        type: 'list',
+                        message: 'Which employee\'s role do you want to update?',
+                        name: 'employee',
+                        choices: choicesEmpArr
+
+                    },
+                    {
+                        type: 'list',
+                        message: 'Which role do you want to assign the selected employee?',
+                        name: 'newRole',
+                        choices: choicesNewRoleArr
+
+                    }
+                ];
+
+                const promptUpdateEmployee = new PrintAndPrompt(null,updateEmployeeQuestions);
+
+                promptUpdateEmployee.promptQuestions();
+            })    
+        })
+    } else {
+        const {employee, newRole} = answers;
+
+        
+    }    
 }
 
 
