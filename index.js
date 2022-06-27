@@ -75,7 +75,7 @@ inquirer.prompt([{
             newRole();
             break;
         case 'add an employee':
-            employeesFunction.promptQuestions();
+            newEmployee();
             break;
         case 'update an employee role':
             
@@ -124,7 +124,7 @@ class PrintAndPrompt {
 };
 const departmentsFunction = new PrintAndPrompt(departmentTable, addDepartment);
 const rolesFunction = new PrintAndPrompt(roleTable);
-const employeesFunction = new PrintAndPrompt(employeesTable, addEmployee);
+const employeesFunction = new PrintAndPrompt(employeesTable);
 
 const newDepartment = (answers) =>{
     const {addDepartment} = answers; 
@@ -204,67 +204,95 @@ const newRole = (answers) => {
 }
 
 const newEmployee = (answers) => {
-    db.query('SELECT * FROM role', (err, result, fields) => {
 
-        const choicesArr = result.map((data) => data.title);
-        
-        const addEmployee = [
-            {
-                type: 'input',
-                message: 'What is the employee\'s first name?',
-                name: 'firstName',
-                validate: (answer) => {
-                    if (answer) {
-                        return true;
-                    }else{
-                        console.log('please submit a first name');
-                        return false;
-                    }
-        
-                }
-            },
-            {
-                type: 'input',
-                message: 'What is the employee\'s last name?',
-                name: 'lastName',
-                validate: (answer) => {
-                    if (answer) {
-                        return true;
-                    }else{
-                        console.log('please submit a last name');
-                        return false;
-                    }
-        
-                }        
-            },
-            {
-                type: 'list',
-                message: 'What is the employee\'s role?',
-                name: 'role',
-                choices: choicesArr        
-            },
-            {
-                type: 'input',
-                message: 'Who is the employee\'s manager?',
-                name: 'manager',
-                validate: (answer) => {
-                    if (answer) {
-                        return true;
-                    }else{
-                        console.log('please submit a role');
-                        return false;
-                    }
-        
-                } 
-            }    
-        ];
+    if(!answers){
+        db.query('SELECT * FROM role', (err, result, fields) => {
 
-        const rolesFunction = new PrintAndPrompt(roleTable, addRole);
-        
-        rolesFunction.promptQuestions();
-        
-    })
-    init();
+            const choicesRoleArr = result.map((data) => data.title);
+
+            db.query(`SELECT id, CONCAT(first_name, ' ', last_name) AS Employees FROM employee`, (err, result, fields) => {
+
+                console.log(result);
+
+                const choicesManagerArr = result.map((data) => data.Employees);
+                choicesManagerArr.push('None');
+            
+                const addEmployee = [
+                    {
+                        type: 'input',
+                        message: 'What is the employee\'s first name?',
+                        name: 'firstName',
+                        validate: (answer) => {
+                            if (answer) {
+                                return true;
+                            }else{
+                                console.log('please submit a first name');
+                                return false;
+                            }
+                
+                        }
+                    },
+                    {
+                        type: 'input',
+                        message: 'What is the employee\'s last name?',
+                        name: 'lastName',
+                        validate: (answer) => {
+                            if (answer) {
+                                return true;
+                            }else{
+                                console.log('please submit a last name');
+                                return false;
+                            }
+                
+                        }        
+                    },
+                    {
+                        type: 'list',
+                        message: 'What is the employee\'s role?',
+                        name: 'role',
+                        choices: choicesRoleArr        
+                    },
+                    {
+                        type: 'input',
+                        message: 'Who is the employee\'s manager?',
+                        name: 'manager',
+                        choices: choicesManagerArr
+                    }    
+                ];
+
+                const employeesFunction = new PrintAndPrompt(roleTable, addEmployee);
+                
+                employeesFunction.promptQuestions();
+
+            })
+            
+        })
+    }else{
+
+        db.query('SELECT * FROM role', (err, result, fields) => {
+            const {firstName, lastName, role, manager} = answers;
+    
+            const roleArr = result.filter((data) => role === data.title);
+            const roleId = roleArr[0].id;
+            console.log(roleArr);
+
+            db.query(`SELECT id, CONCAT(first_name, ' ', last_name) AS Employees FROM employee`, (err, result, fields) => {
+
+                const managerArr = result.filter((data) => manager === data.Employees);
+                const managerId = managerArr[0].id;
+                console.log(managerArr);
+
+                const params = [firstName, lastName, roleId, managerId];
+                db.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)', params, (err, result, fields) => {
+                    console.log(`Added ${firstName + ' ' + lastName} to the database`)
+                    init();
+                })
+
+            })
+        })
+
+    }
+    // init();
 }
 
 
