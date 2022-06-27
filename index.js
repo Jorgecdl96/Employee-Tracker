@@ -47,7 +47,6 @@ const addDepartment = [
         }
 }];
 
-
 const init = () => {
     
 inquirer.prompt([{
@@ -78,7 +77,7 @@ inquirer.prompt([{
             newEmployee();
             break;
         case 'update an employee role':
-            
+            updateEmployee();
             break;       
     
         default:
@@ -253,7 +252,7 @@ const newEmployee = (answers) => {
                         choices: choicesRoleArr        
                     },
                     {
-                        type: 'input',
+                        type: 'list',
                         message: 'Who is the employee\'s manager?',
                         name: 'manager',
                         choices: choicesManagerArr
@@ -274,24 +273,51 @@ const newEmployee = (answers) => {
     
             const roleArr = result.filter((data) => role === data.title);
             const roleId = roleArr[0].id;
-            console.log(roleArr);
+    
 
             db.query(`SELECT id, CONCAT(first_name, ' ', last_name) AS Employees FROM employee`, (err, result, fields) => {
 
-                const managerArr = result.filter((data) => manager === data.Employees);
-                const managerId = managerArr[0].id;
-                console.log(managerArr);
+                if (manager === 'None') {
 
-                const params = [firstName, lastName, roleId, managerId];
-                db.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)', params, (err, result, fields) => {
-                    console.log(`Added ${firstName + ' ' + lastName} to the database`)
-                    init();
-                })
+                    const params = [firstName, lastName, roleId, null];
+                    db.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)', params, (err, result, fields) => {
+                        console.log(`Added ${firstName + ' ' + lastName} to the database`)
+                        init();
+                    })
+
+                } else {
+                    
+                    const managerArr = result.filter((data) => manager === data.Employees);
+                    const managerId = managerArr[0].id;
+    
+                    const params = [firstName, lastName, roleId, managerId];
+                    db.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)', params, (err, result, fields) => {
+                        console.log(`Added ${firstName + ' ' + lastName} to the database`)
+                        init();
+                    })
+                }
 
             })
         })
 
     }
+}
+
+const updateEmployee = () => {
+    updateEmployeeQuestions = [
+        {
+            type: 'input',
+            message: 'Which employee\'s role do you want to update?',
+            name: 'employee',
+
+        },
+        {
+            type: 'input',
+            message: 'Which role do you want to assign the selected employee?',
+            name: 'newRole',
+
+        }
+    ]
 }
 
 
