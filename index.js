@@ -292,7 +292,6 @@ const newEmployee = (answers) => {
         })
 
     }
-    // init();
 }
 
 
