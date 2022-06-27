@@ -7,7 +7,7 @@
 
 All companies need to store information in a structured way, and with this project it is possible.
 
-The Employee-Tracker can help us to see formatted tables showing the departments, roles and employees that one company has. Also we can add new departments, roles and employees if it´s the case and finally we are able to change the employees´s role is someone it´s changing of role within the company.
+The Employee-Tracker can help us to see formatted tables showing the departments, roles and employees that one company has. Also we can add new departments, roles and employees if it´s the case and finally we are able to change the employees´s role if someone it´s changing of role within the company.
 
 This Project has been built with help of the following technologies: 
 
