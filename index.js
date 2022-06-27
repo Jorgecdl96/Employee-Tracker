@@ -99,6 +99,7 @@ class PrintAndPrompt {
     printTable (){
         
         db.query(this.categorieTable, (err, result, fields) => {
+            if (err) throw err; 
             console.table(result);
             init();
         
@@ -140,7 +141,7 @@ const newRole = (answers) => {
 
     if(!answers){
         db.query('SELECT * FROM department', (err, result, fields) => {
-
+            if (err) throw err; 
             const choicesArr = result.map((data) => data.name);
             
             const addRole = [
@@ -190,6 +191,7 @@ const newRole = (answers) => {
     }else{
 
         db.query('SELECT * FROM department', (err, result, fields) => {
+            if (err) throw err; 
             const {addRole, salary, department} = answers;
     
             const roleDepaArr = result.filter((data) => department === data.name );
@@ -197,6 +199,7 @@ const newRole = (answers) => {
            
             const params = [addRole, salary, depaId];
             db.query('INSERT INTO role (title, salary, department_id) VALUES (?,?,?)', params, (err, result, fields) => {
+                if (err) throw err; 
                 console.log(`Added ${addRole} to the database`)
                 init();
             })
@@ -208,12 +211,11 @@ const newEmployee = (answers) => {
 
     if(!answers){
         db.query('SELECT * FROM role', (err, result, fields) => {
-
+            if (err) throw err; 
             const choicesRoleArr = result.map((data) => data.title);
 
             db.query(`SELECT id, CONCAT(first_name, ' ', last_name) AS Employees FROM employee`, (err, result, fields) => {
-
-                console.log(result);
+                if (err) throw err; 
 
                 const choicesManagerArr = result.map((data) => data.Employees);
                 choicesManagerArr.push('None');
@@ -271,6 +273,7 @@ const newEmployee = (answers) => {
     }else{
 
         db.query('SELECT * FROM role', (err, result, fields) => {
+            if (err) throw err; 
             const {firstName, lastName, role, manager} = answers;
     
             const roleArr = result.filter((data) => role === data.title);
@@ -278,11 +281,13 @@ const newEmployee = (answers) => {
     
 
             db.query(`SELECT id, CONCAT(first_name, ' ', last_name) AS Employees FROM employee`, (err, result, fields) => {
+                if (err) throw err; 
 
                 if (manager === 'None') {
 
                     const params = [firstName, lastName, roleId, null];
                     db.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)', params, (err, result, fields) => {
+                        if (err) throw err; 
                         console.log(`Added ${firstName + ' ' + lastName} to the database`)
                         init();
                     })
@@ -294,6 +299,7 @@ const newEmployee = (answers) => {
     
                     const params = [firstName, lastName, roleId, managerId];
                     db.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)', params, (err, result, fields) => {
+                        if (err) throw err; 
                         console.log(`Added ${firstName + ' ' + lastName} to the database`)
                         init();
                     })
@@ -310,11 +316,11 @@ const updateEmployee = (answers) => {
     if (!answers) {
         
         db.query(`SELECT id, CONCAT(first_name, ' ', last_name) AS Employees FROM employee`, (err, result, fields) => {
-
+            if (err) throw err; 
             const choicesEmpArr = result.map((data) => data.Employees);
 
             db.query('SELECT * FROM role', (err, result, fields) => {
-
+                if (err) throw err; 
                 const choicesNewRoleArr = result.map((data) => data.title);
 
                 updateEmployeeQuestions = [
@@ -340,8 +346,30 @@ const updateEmployee = (answers) => {
             })    
         })
     } else {
-        const {employee, newRole} = answers;
+        
+        db.query(`SELECT id, CONCAT(first_name, ' ', last_name) AS Employees FROM employee`, (err, result, fields) => {
+            if (err) throw err; 
+            const {employee, newRole} = answers;
 
+            const employeeArr = result.filter((data) => employee === data.Employees);
+            const employeeId = employeeArr[0].id;
+
+            db.query('SELECT * FROM role', (err, result, fields) => {
+                if (err) throw err;
+
+                const roleArr = result.filter((data) => newRole === data.title);
+                const roleId = roleArr[0].id;
+
+                db.query(`UPDATE employee SET role_id = ${roleId} WHERE id = ${employeeId}`, (err, result, fields) => {
+                   if (err) throw err;
+                    console.log(`${employee} role has been updated`);
+                    init();
+
+                })
+
+            })
+
+        })
         
     }    
 }
