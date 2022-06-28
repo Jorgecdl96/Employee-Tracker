@@ -74,4 +74,4 @@ You can send an e-mail to Jorgecdl96@gmail.com for any additional question.
 
 You can see an example of how the project works by clicking on link below:
 
-[Video]
+[Employee-Tracker Walkthrough Video](https://drive.google.com/file/d/17tYDhDay2meaAGeSX43hmA_isKzHMeot/view?usp=sharing)
